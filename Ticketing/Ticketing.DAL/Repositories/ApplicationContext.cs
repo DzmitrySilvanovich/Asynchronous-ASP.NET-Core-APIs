@@ -1,12 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Ticketing.DAL.Domain;
 using Ticketing.DAL.Domains;
+using static Ticketing.DAL.Enums.Statuses;
 
 namespace Ticketing.DAL.Repositories
 {
@@ -27,10 +25,12 @@ namespace Ticketing.DAL.Repositories
         public ApplicationContext(DbContextOptions<ApplicationContext> options)
             : base(options)
         {
-            // uncoment for create database
-           //   Database.EnsureDeleted(); // гарантируем, что бд удалена
-           //   Database.EnsureCreated(); // гарантируем, что бд будет создана
+            if (!Database.GetService<IRelationalDatabaseCreator>().Exists())
+            {
+                Database.EnsureCreated();
+            }
         }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.LogTo(message => System.Diagnostics.Debug.WriteLine(message), new[] { DbLoggerCategory.Database.Command.Name },
@@ -39,25 +39,24 @@ namespace Ticketing.DAL.Repositories
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // uncoment for create database
-            //  modelBuilder.Entity<ShoppingCart>().HasAlternateKey(c => new { c.EventId, c.SeatId });
-            //  modelBuilder.Entity<Section>().HasAlternateKey(s => new { s.VenueId, s.Name });
+              modelBuilder.Entity<ShoppingCart>().HasAlternateKey(c => new { c.EventId, c.SeatId });
+              modelBuilder.Entity<Section>().HasAlternateKey(s => new { s.VenueId, s.Name });
 
-            //  InitializatioData(modelBuilder);
+            InitializatioData(modelBuilder);
         }
 
-        private void InitializatioData (ModelBuilder modelBuilder)
+        private static void InitializatioData (ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<SeatStatus>().HasData(
-              new SeatStatus { Id = 1, Name = "Available" },
-              new SeatStatus { Id = 2, Name = "Booked" },
-              new SeatStatus { Id = 3, Name = "Sold" });
+              new SeatStatus { Id = (SeatState)1, Name = "Available" },
+              new SeatStatus { Id = (SeatState)2, Name = "Booked" },
+              new SeatStatus { Id = (SeatState)3, Name = "Sold" });
 
             modelBuilder.Entity<PaymentStatus>().HasData(
-                new PaymentStatus { Id = 1, Name = "No payment" },
-                new PaymentStatus { Id = 2, Name = "Part payment" },
-                new PaymentStatus { Id = 3, Name = "Full payment" },
-                new PaymentStatus { Id = 4, Name = "Payment Failed" });
+                new PaymentStatus { Id = (PaymentState)1, Name = "No payment" },
+                new PaymentStatus { Id = (PaymentState)2, Name = "Part payment" },
+                new PaymentStatus { Id = (PaymentState)3, Name = "Full payment" },
+                new PaymentStatus { Id = (PaymentState)4, Name = "Payment Failed" });
 
 
             modelBuilder.Entity<PriceType>().HasData(
@@ -82,12 +81,22 @@ namespace Ticketing.DAL.Repositories
                 new Section { Id = 3, Name = "Section1", VenueId = 2, PriceTypeId = 3 });
 
             modelBuilder.Entity<Seat>().HasData(
-                new Seat { Id = 1, SectionId = 1, RowNumber = 1, SeatNumber = 1, SeatStatusId = 1 },
-                new Seat { Id = 2, SectionId = 1, RowNumber = 1, SeatNumber = 2, SeatStatusId = 1 },
-                new Seat { Id = 3, SectionId = 1, RowNumber = 1, SeatNumber = 3, SeatStatusId = 1 });
+                new Seat { Id = 1, SectionId = 1, RowNumber = 1, SeatNumber = 1, SeatStatusId = SeatState.Available },
+                new Seat { Id = 2, SectionId = 1, RowNumber = 1, SeatNumber = 2, SeatStatusId = SeatState.Available },
+                new Seat { Id = 3, SectionId = 1, RowNumber = 1, SeatNumber = 3, SeatStatusId = SeatState.Available });
 
             modelBuilder.Entity<Cart>().HasData(
               new Cart { Id = new Guid("F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4") });
+
+            modelBuilder.Entity<ShoppingCart>().HasData(
+              new ShoppingCart {
+                  Id = 1,
+                  EventId = 1,
+                  SeatId = 1,
+                  PriceTypeId = 1,
+                  Price = 1,
+                  CartId = new Guid("F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4") 
+              });
         }
     }
 }

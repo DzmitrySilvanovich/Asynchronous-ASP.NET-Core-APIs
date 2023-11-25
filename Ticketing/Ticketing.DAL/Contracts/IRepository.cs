@@ -8,11 +8,11 @@ using Ticketing.DAL.Domain;
 
 namespace Ticketing.DAL.Contracts
 {
-    public interface IRepository<T>
+     public interface IRepository<T>
     {
         public Task<T> CreateAsync(T entity);
 
-        public Task<IEnumerable<T>> GetAllAsync();
+        public Task<IQueryable<T>> GetAllAsync();
 
         public Task<T?> GetByIdAsync(object Id);
 

@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml.Linq;
-using Ticketing.BAL.Contracts;
+﻿using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 using Ticketing.DAL.Contracts;
 using Ticketing.DAL.Domain;
+using Ticketing.DAL.Repositories;
+using Mapster;
 
 namespace Ticketing.BAL.Services
 {
@@ -16,7 +12,7 @@ namespace Ticketing.BAL.Services
         private readonly IRepository<Venue> _repository;
         private readonly IRepository<Section> _repositorySection;
 
-        public VenueService(IRepository<Venue> repository, IRepository<Section> repositorySection)
+        public VenueService(Repository<Venue> repository, Repository<Section> repositorySection)
         {
             _repository = repository;
             _repositorySection = repositorySection;
@@ -25,13 +21,13 @@ namespace Ticketing.BAL.Services
         public async Task<IEnumerable<VenueReturnModel>> GetVenuesAsync()
         {
             var venues = await _repository.GetAllAsync();
-            return venues.Select(v => new VenueReturnModel { Id = v.Id, Name = v.Name }).ToList();
+            return venues.AsQueryable().ProjectToType<VenueReturnModel>().ToList();
         }
 
-        public async Task<IEnumerable<SectionReturnModel>> GetSectionsOfVenue(int venue_id)
+        public async Task<IEnumerable<SectionReturnModel>> GetSectionsOfVenue(int venueId)
         {
             var ss = await _repositorySection.GetAllAsync();
-            var sections = ss.Where(s => s.VenueId == venue_id).Select(s => new SectionReturnModel { Id = s.Id, Name = s.Name }).ToList();
+            var sections = ss.Where(s => s.VenueId == venueId).AsQueryable().ProjectToType<SectionReturnModel>().ToList();
 
             return sections;
         }

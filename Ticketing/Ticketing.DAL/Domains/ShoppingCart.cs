@@ -11,11 +11,9 @@ namespace Ticketing.DAL.Domains
     {
         public int Id { get; set; }
         public int EventId { get; set; }
-        public Event? Event { get; set; }
         public int SeatId { get; set; }
         public int PriceTypeId { get; set; }
         public decimal Price { get; set; }
         public Guid CartId { get; set; }
-        public Cart? Cart { get; set; }
     }
 }

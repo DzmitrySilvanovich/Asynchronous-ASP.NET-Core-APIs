@@ -16,7 +16,7 @@ namespace Ticketing.BAL.Contracts
 
         public Task<int> BookSeatToCartAsync(Guid cartId);
 
-        public Task DeleteSeatForCartAsync(Guid cart_id, int event_id, int seat_id);
+        public Task DeleteSeatForCartAsync(Guid cartId, int eventId, int seatId);
 
         public Task<IEnumerable<ShoppingCartReturnModel>> CartItemsAsync(Guid cartId);
     }

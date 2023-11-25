@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ticketing.DAL.Enums;
+using static Ticketing.DAL.Enums.Statuses;
 
 namespace Ticketing.DAL.Domain
 {
@@ -12,9 +14,7 @@ namespace Ticketing.DAL.Domain
         public int Id { get; set; }
         public int RowNumber { get; set; }
         public int SeatNumber { get; set; }
-        public int SeatStatusId { get; set; }
-        public SeatStatus? SeatStatus { get; set; }
+        public SeatState SeatStatusId { get; set; }
         public int SectionId { get; set; }
-        public Section? Section { get; set; }
     }
 }

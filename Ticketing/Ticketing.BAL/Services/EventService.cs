@@ -1,85 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Mapster;
 using Ticketing.BAL.Contracts;
-using Ticketing.BAL.Enums;
 using Ticketing.BAL.Model;
 using Ticketing.DAL.Contracts;
 using Ticketing.DAL.Domain;
 using Ticketing.DAL.Domains;
+using Ticketing.DAL.Repositories;
 
 namespace Ticketing.BAL.Services
 {
     public class EventService : IEventService
     {
         private readonly IRepository<Event> _repositoryEvent;
-        private readonly IRepository<Section> _repositorySection;
         private readonly IRepository<Seat> _repositorySeat;
         private readonly IRepository<SeatStatus> _repositorySeatStatus;
         private readonly IRepository<PriceType> _repositoryPriceType;
         private readonly IRepository<ShoppingCart> _repositoryShoppingCart;
 
-        public EventService(IRepository<Event> repositoryEvent,
-                            IRepository<Section> repositorySection,
-                            IRepository<Seat> repositorySeat,
-                            IRepository<SeatStatus> repositorySeatStatus,
-                            IRepository<PriceType> repositoryPriceType,
-                            IRepository<ShoppingCart> repositoryShoppingCart)
+        public EventService(Repository<Event> repositoryEvent,
+                            Repository<Seat> repositorySeat,
+                            Repository<SeatStatus> repositorySeatStatus,
+                            Repository<PriceType> repositoryPriceType,
+                            Repository<ShoppingCart> repositoryShoppingCart)
         {
             _repositoryEvent = repositoryEvent;
-            _repositorySection = repositorySection;
             _repositorySeat = repositorySeat;
             _repositorySeatStatus = repositorySeatStatus;
             _repositoryPriceType = repositoryPriceType;
             _repositoryShoppingCart = repositoryShoppingCart;
         }
 
-
-
-
         public async Task<IEnumerable<EventReturnModel>> GetEventsAsync()
         {
             var events = await _repositoryEvent.GetAllAsync();
-            return events.Select(e => new EventReturnModel { Id = e.Id, Name = e.Name, EventDate = e.EventDate }).ToList();
+            return events.AsQueryable().ProjectToType<EventReturnModel>().ToList();
         }
 
         public async Task<List<SeatReturnModel>> GetSeatsAsync(int eventId, int sectionId)
         {
-            var seatStatuses = (await _repositorySeatStatus.GetAllAsync()).ToList();
-            var priceTypes = (await _repositoryPriceType.GetAllAsync()).ToList();
+            var seatStatuses = await _repositorySeatStatus.GetAllAsync();
+            var priceTypes = await _repositoryPriceType.GetAllAsync();
 
             var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
-            var shoppingCartsFiltered = shoppingCarts.Where(sh => sh.EventId == eventId).ToList();
-
-            var seatIdShippingCart = shoppingCartsFiltered.Select(sh => sh.Id);
-
             var seats = await _repositorySeat.GetAllAsync();
-            var seatFiltered = seats.Where(s => s.SectionId == sectionId).ToList();
 
-            List<SeatReturnModel> seatReturnModels = seatFiltered.Where(s => seatIdShippingCart.Contains(s.Id))
-                .Select(s => new SeatReturnModel
-                {
-                    SeatId = s.Id,
-                    SectionId = s.SectionId,
-                    RowNumber = s.RowNumber,
-                    SeatNumber = s.SeatNumber,
-                    SeatStatusId = s.SeatStatusId,
-                    NameSeatStatus = string.Empty,
-                    PriceTypeId = 0,
-                    NamePriceType = string.Empty
-                }).ToList();
+            var result = (from seat in seats.Where(s => s.SectionId == sectionId)
+                          join shoppingCart in shoppingCarts.Where(sh => sh.EventId == eventId)
+                          on seat.Id equals shoppingCart.SeatId
+                          join seatStatus in seatStatuses
+                          on seat.SeatStatusId equals seatStatus.Id
+                          join priceType in priceTypes
+                          on shoppingCart.PriceTypeId equals priceType.Id
+                          select new
+                          {
+                              SeatId = seat.Id,
+                              seat.SectionId,
+                              seat.RowNumber,
+                              seat.SeatNumber,
+                              seat.SeatStatusId,
+                              NameSeatStatus = seatStatus.Name,
+                              shoppingCart.PriceTypeId,
+                              NamePriceType = priceType.Name
+                          }).AsQueryable().ProjectToType<SeatReturnModel>().ToList();
 
-            foreach (var item in seatReturnModels)
-            {
-              var priceTypeId = shoppingCartsFiltered.FirstOrDefault(sh => sh.SeatId == item.SeatId)!.PriceTypeId;
-              item.PriceTypeId = priceTypeId;
-              item.NamePriceType = priceTypes.FirstOrDefault(p => p.Id == priceTypeId)!.Name;
-              item.NameSeatStatus = seatStatuses.FirstOrDefault(s => s.Id == item.SeatStatusId)!.Name;
-            }
-
-            return seatReturnModels;
+            return result;
         }
     }
 }

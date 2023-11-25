@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Ticketing.DAL.Domain;
+using static Ticketing.DAL.Enums.Statuses;
 
 namespace Ticketing.BAL.Model
 {
@@ -12,7 +14,7 @@ namespace Ticketing.BAL.Model
         public int SectionId { get; set; }
         public int RowNumber { get; set; }
         public int SeatNumber { get; set; }
-        public int SeatStatusId { get; set; }
+        public SeatState SeatStatusId { get; set; }
         public required string NameSeatStatus { get; set; }
         public int PriceTypeId { get; set; }
         public required string NamePriceType { get; set; }

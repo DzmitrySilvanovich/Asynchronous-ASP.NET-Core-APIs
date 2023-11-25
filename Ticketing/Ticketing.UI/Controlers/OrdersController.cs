@@ -1,16 +1,12 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
-using Ticketing.BAL.Services;
-using Ticketing.DAL.Domain;
-using Ticketing.DAL.Domains;
 
 namespace Ticketing.UI.Controlers
 {
+    /// <summary>
+    /// Orders API
+    /// </summary>
     [Route("api/[controller]/carts")]
     [ApiController]
     public class OrdersController : ControllerBase
@@ -23,40 +19,76 @@ namespace Ticketing.UI.Controlers
 
         }
 
-        //GET orders/carts /{cart_id}
+        /// <summary>
+        /// Get items of the cart.
+        /// <param name="id">Cart id</param>
+        /// <returns>The collection of items of the cart</returns>
+        /// <response code="200">Return a status of request</response>
+        /// <response code="400">Bad request</response>        
+        /// </summary>
         [HttpGet("{id}")]
-        public async IAsyncEnumerable<ShoppingCartReturnModel> GetAsync(Guid id)
+        public async Task<IActionResult> GetAsync(Guid id)
         {
             var shoppingCarts = await _cartService.CartItemsAsync(id);
 
-            foreach (var shoppingCart in shoppingCarts)
+            if (shoppingCarts is null)
             {
-                yield return shoppingCart;
+                return BadRequest(string.Empty);
             }
+            else if (!shoppingCarts.Any())
+            {
+                return NoContent();
+            }
+
+            return Ok(shoppingCarts);
         }
 
-        // POST orders/carts/{cart_id}
-        [HttpPost("{id}")]
-         public async Task<CartStateReturnModel> Post(Guid Id, [FromBody] OrderCartModel orderCartModel)
+        /// <summary>
+        /// Add Seat To Cart.
+        /// <param name="Id">Cart id</param>
+        /// <param name="orderCartModel">Payload for the action</param>
+        /// <returns>The collection of items of the cart</returns>
+        /// <response code="200">Return a status of request with result</response>
+        /// <response code="400">Bad request</response>        
+        /// </summary>
+        [HttpPost("{Id}")]
+         public async Task<IActionResult> Post(Guid Id, [FromBody] OrderCartModel orderCartModel)
         {
             var result = await _cartService.AddSeatToCartAsync(Id, orderCartModel);
-            return result;
+
+            if (result is null)
+            {
+                return BadRequest(string.Empty);
+            }
+
+            return Ok(result);
         }
 
-        // PUT api/<ValuesController>/5
-        [HttpPut("{cart_id}/book")]
-        public async Task<int> PutAsync(Guid cart_id)
+        /// <summary>
+        /// Book Seat To Cart.
+        /// <param name="cartId">Cart id</param>
+        /// <response code="200">Return a status of request</response>
+        /// </summary>
+        [HttpPut("{cartId}/book")]
+        public async Task<IActionResult> PutAsync(Guid cartId)
         {
-            var result = await _cartService.BookSeatToCartAsync(cart_id);
+            var result = await _cartService.BookSeatToCartAsync(cartId);
 
-            return result;
+            return Ok(result);
         }
 
-        //DELETE orders/carts/{cart_id}/events/{event_id}/seats/{seat_id}
-        [HttpDelete("{cart_id}/events/{event_id}/seats/{seat_id}")]
-        public async Task DeleteAsync(Guid cart_id, int event_id, int seat_id)
+        /// <summary>
+        /// Delete Seat For Cart.
+        /// <param name="cartId">Cart id</param>
+        /// <param name="eventId">Event id</param>
+        /// <param name="seatId">Seat id</param>
+        /// <response code="200">Return a status of request</response>
+        /// </summary>
+        [HttpDelete("{cartId}/events/{eventId}/seats/{seatId}")]
+        public async Task<IActionResult> DeleteAsync(Guid cartId, int eventId, int seatId)
         {
-            await _cartService.DeleteSeatForCartAsync(cart_id, event_id, seat_id);
+            await _cartService.DeleteSeatForCartAsync(cartId, eventId, seatId);
+            return Ok();
         }
     }
 }

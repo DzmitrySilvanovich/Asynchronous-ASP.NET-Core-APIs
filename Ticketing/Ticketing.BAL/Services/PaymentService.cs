@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Mapster;
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 using Ticketing.DAL.Contracts;
 using Ticketing.DAL.Domain;
 using Ticketing.DAL.Domains;
-using static Ticketing.BAL.Enums.Statuses;
+using Ticketing.DAL.Repositories;
+using static Ticketing.DAL.Enums.Statuses;
 
 namespace Ticketing.BAL.Services
 {
@@ -19,10 +16,10 @@ namespace Ticketing.BAL.Services
         readonly IRepository<ShoppingCart> _repositoryShoppingCart;
         readonly IRepository<Seat> _repositorySeat;
 
-        public PaymentService(IRepository<Payment> repositoryPayment,
-            IRepository<PaymentStatus> repositoryPaymentStatus,
-            IRepository<ShoppingCart> repositoryShoppingCart,
-            IRepository<Seat> repositorySeat)
+       public PaymentService(Repository<Payment> repositoryPayment,
+            Repository<PaymentStatus> repositoryPaymentStatus,
+            Repository<ShoppingCart> repositoryShoppingCart,
+            Repository<Seat> repositorySeat)
         {
             _repositoryPayment = repositoryPayment;
             _repositoryPaymentStatus = repositoryPaymentStatus;
@@ -32,7 +29,7 @@ namespace Ticketing.BAL.Services
 
         public async Task<PaymentStatusReturnModel> GetPaymentSatatusAsync(int paymentId)
         {
-            var returnPaymentStatus = new PaymentStatusReturnModel();
+            var returnPaymentStatus = new PaymentStatusReturnModel { Id = 0, Name = string.Empty};
 
             var payment = await _repositoryPayment.GetByIdAsync(paymentId);
 
@@ -48,7 +45,7 @@ namespace Ticketing.BAL.Services
                 return returnPaymentStatus;
             }
 
-            return returnPaymentStatus;
+            return paymentStatus.Adapt(returnPaymentStatus);
         }
 
         public async Task CompletePaymentAsync(int paymentId)
@@ -60,7 +57,7 @@ namespace Ticketing.BAL.Services
                 return;
             }
 
-            payment.PaymentStatusId = (int)PaymentStatusEnum.Full_payment;
+            payment.PaymentStatusId = PaymentState.FullPayment;
             await _repositoryPayment.UpdateAsync(payment);
 
             var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
@@ -75,7 +72,7 @@ namespace Ticketing.BAL.Services
 
             foreach (var seat in seats)
             {
-                seat.SeatStatusId = (int)SeatStatusEnum.Sold;
+                seat.SeatStatusId = SeatState.Sold;
                 await _repositorySeat.UpdateAsync(seat);
             }
         }
@@ -89,7 +86,7 @@ namespace Ticketing.BAL.Services
                 return;
             }
 
-            payment.PaymentStatusId = (int)PaymentStatusEnum.Payment_Failed;
+            payment.PaymentStatusId = PaymentState.PaymentFailed;
             await _repositoryPayment.UpdateAsync(payment);
 
             var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
@@ -104,7 +101,7 @@ namespace Ticketing.BAL.Services
 
             foreach (var seat in seats)
             {
-                seat.SeatStatusId = (int)SeatStatusEnum.Available;
+                seat.SeatStatusId = SeatState.Available;
                 await _repositorySeat.UpdateAsync(seat);
             }
         }

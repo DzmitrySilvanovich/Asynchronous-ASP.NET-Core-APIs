@@ -11,6 +11,7 @@ namespace Ticketing.BAL.Contracts
     public interface IVenueService
     {
         public Task<IEnumerable<VenueReturnModel>> GetVenuesAsync();
-        public Task<IEnumerable<SectionReturnModel>> GetSectionsOfVenue(int venue_id);
+
+        public Task<IEnumerable<SectionReturnModel>> GetSectionsOfVenue(int venueId);
     }
 }

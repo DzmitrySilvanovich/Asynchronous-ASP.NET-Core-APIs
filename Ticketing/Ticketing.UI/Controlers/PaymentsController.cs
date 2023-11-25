@@ -1,12 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Mvc;
 using Ticketing.BAL.Contracts;
-using Ticketing.BAL.Model;
-using Ticketing.DAL.Domain;
 
 namespace Ticketing.UI.Controlers
 {
+    /// <summary>
+    /// Payments API
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     public class PaymentsController : ControllerBase
@@ -18,27 +17,50 @@ namespace Ticketing.UI.Controlers
             _paymentService = paymentService;
         }
 
-        //GET payments/{payment_id}
+        /// <summary>
+        /// Get the status of the payment.
+        /// <param name="id">Payment id</param>
+        /// <returns>payment status of payment</returns>
+        /// <response code="200">Return a status of payment</response>
+        /// <response code="400">Bad request</response>        
+        /// </summary>
         [HttpGet("{id}")]
-        public async Task<PaymentStatusReturnModel> GetAsync(int id)
+        public async Task<IActionResult> GetAsync(int id)
         {
             var res = await _paymentService.GetPaymentSatatusAsync(id);
 
-            return res;
+            if (res is null)
+            {
+                return BadRequest(string.Empty);
+            }
+         
+            return Ok(res);
         }
 
-        //POST payments/{payment_id}/complete
-        [HttpPost("{id}/complete")]
-        public async Task PostCompleteAsync(int id)
+        /// <summary>
+        /// Complete Payment.
+        /// <param name="id">Payment id</param>
+        /// <returns>payment status of payment</returns>
+        /// <response code="204"></response>
+        /// </summary>
+        [HttpPut("{id}/complete")]
+        public async Task<IActionResult> PutCompleteAsync(int id)
         {
             await _paymentService.CompletePaymentAsync(id);
+            return NoContent();
         }
 
-        // POST payments/{payment_id}/failed
-        [HttpPost("{id}/failed")]
-        public async Task PostFailedAsync(int id)
+        /// <summary>
+        /// Fail Payment.
+        /// <param name="id">Payment id</param>
+        /// <returns>payment status of payment</returns>
+        /// <response code="204"></response>
+        /// </summary>
+        [HttpPut("{id}/failed")]
+        public async Task<IActionResult> PutFailedAsync(int id)
         {
             await _paymentService.FailedPaymentAsync(id);
+            return NoContent();
         }
     }
 }

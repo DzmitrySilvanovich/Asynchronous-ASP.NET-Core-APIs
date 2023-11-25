@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Mapster;
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 using Ticketing.DAL.Contracts;
 using Ticketing.DAL.Domain;
 using Ticketing.DAL.Domains;
-using static Ticketing.BAL.Enums.Statuses;
+using Ticketing.DAL.Repositories;
+using static Ticketing.DAL.Enums.Statuses;
 
 namespace Ticketing.BAL.Services
 {
@@ -18,7 +15,7 @@ namespace Ticketing.BAL.Services
         readonly IRepository<Seat> _repositorySeat;
         readonly IRepository<Payment> _repositoryPayment;
 
-        public CartService(IRepository<ShoppingCart> repository, IRepository<Seat> repositorySeat, IRepository<Payment> repositoryPayment)
+        public CartService(Repository<ShoppingCart> repository, Repository<Seat> repositorySeat, Repository<Payment> repositoryPayment)
         {
             _repositoryShoppingCart = repository;
             _repositorySeat = repositorySeat;
@@ -43,13 +40,15 @@ namespace Ticketing.BAL.Services
                 CartId = CartId,
             };
 
-            if (item == null)
+            if (item is null)
             {
                 await _repositoryShoppingCart.CreateAsync(shoppingCartDto);
             }
-
-            item.PriceTypeId = orderCartModel.PriceTypeId;
-            item.Price = orderCartModel.Price;
+            else
+            {
+                item.PriceTypeId = orderCartModel.PriceTypeId;
+                item.Price = orderCartModel.Price;
+            }
 
             await _repositoryShoppingCart.UpdateAsync(shoppingCartDto);
 
@@ -80,7 +79,7 @@ namespace Ticketing.BAL.Services
 
             foreach (var seat in seats)
             {
-                seat.SeatStatusId = (int)SeatStatusEnum.Booked;
+                seat.SeatStatusId = SeatState.Booked;
                 await _repositorySeat.UpdateAsync(seat);
             }
 
@@ -88,7 +87,7 @@ namespace Ticketing.BAL.Services
             {
                 Amount = totalAmount,
                 CartId = cartId,
-                PaymentStatusId = (int)PaymentStatusEnum.No_payment
+                PaymentStatusId = PaymentState.NoPayment
             };
 
             var newPayment = await _repositoryPayment.CreateAsync(payment);
@@ -106,22 +105,12 @@ namespace Ticketing.BAL.Services
             {
                 await _repositoryShoppingCart.DeleteAync(item);
             }
-
-            return;
         }
 
         public async Task<IEnumerable<ShoppingCartReturnModel>> CartItemsAsync(Guid cartId)
         {
              var items = await _repositoryShoppingCart.GetAllAsync();
-            return items.Where(i => i.CartId == cartId).Select(s => new ShoppingCartReturnModel
-            {
-                Id = s.Id,
-                EventId = s.EventId,
-                SeatId = s.SeatId,
-                PriceTypeId = s.PriceTypeId,
-                Price = s.Price,
-                CartId = s.CartId
-            });
+            return items.Where(i => i.CartId == cartId).AsQueryable().ProjectToType<ShoppingCartReturnModel>().ToList();
         }
     }
 }

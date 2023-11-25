@@ -12,9 +12,7 @@ namespace Ticketing.DAL.Domain
         public int Id { get; set; }
         public required string Name { get; set; }
         public int VenueId { get; set; }
-        public Venue? Venue { get; set; }
         public int PriceTypeId { get; set; }
-        public PriceType? PriceType { get; set; }
         public List<Seat> Seats { get; set; } = new List<Seat>();
     }
 }
