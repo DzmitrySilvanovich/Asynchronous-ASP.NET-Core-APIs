@@ -9,10 +9,10 @@ namespace Ticketing.BAL.Contracts
 {
     public interface IPaymentService
     {
-        Task<PaymentStatusReturnModel> GetPaymentSatatusAsync(int paymentId);
+        Task<PaymentStatusReturnModel> GetPaymentStatusAsync(int paymentId);
 
         Task CompletePaymentAsync(int paymentId);
 
-        Task FailedPaymentAsync(int paymentId);
+        Task FailPaymentAsync(int paymentId);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 using Ticketing.DAL.Contracts;
@@ -22,14 +23,11 @@ namespace Ticketing.BAL.Services
             _repositoryPayment = repositoryPayment;
         }
 
-        public async Task<CartStateReturnModel> AddSeatToCartAsync(Guid CartId, OrderCartModel orderCartModel)
+        public async Task<CartStateReturnModel> AddSeatToCartAsync(Guid cartId, OrderCartModel orderCartModel)
         {
-
-            var cartId = CartId;
-
             var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
 
-            var item = shoppingCarts.Where(c => c.CartId == cartId && c.EventId == orderCartModel.EventId && c.SeatId == orderCartModel.SeatId).FirstOrDefault();
+            var item = shoppingCarts.FirstOrDefault(c => c.CartId == cartId && c.EventId == orderCartModel.EventId && c.SeatId == orderCartModel.SeatId);
 
             var shoppingCartDto = new ShoppingCart
             {
@@ -37,22 +35,10 @@ namespace Ticketing.BAL.Services
                 SeatId = orderCartModel.SeatId,
                 PriceTypeId = orderCartModel.PriceTypeId,
                 Price = orderCartModel.Price,
-                CartId = CartId,
+                CartId = cartId,
             };
 
-            if (item is null)
-            {
-                await _repositoryShoppingCart.CreateAsync(shoppingCartDto);
-            }
-            else
-            {
-                item.PriceTypeId = orderCartModel.PriceTypeId;
-                item.Price = orderCartModel.Price;
-            }
-
-            await _repositoryShoppingCart.UpdateAsync(shoppingCartDto);
-
-            shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            await CreateOrUpdateAsync();
 
             var totalAmount = shoppingCarts.Sum(sc => sc.Price);
 
@@ -61,6 +47,20 @@ namespace Ticketing.BAL.Services
                 CartId = cartId,
                 TotalAmount = totalAmount
             };
+
+            async Task CreateOrUpdateAsync()
+            {
+                if (item is null)
+                {
+                    await _repositoryShoppingCart.CreateAsync(shoppingCartDto);
+                }
+                else
+                {
+                    item.PriceTypeId = orderCartModel.PriceTypeId;
+                    item.Price = orderCartModel.Price;
+                    await _repositoryShoppingCart.UpdateAsync(shoppingCartDto);
+                }
+            }
         }
 
         public async Task<int> BookSeatToCartAsync(Guid cartId)
@@ -99,7 +99,7 @@ namespace Ticketing.BAL.Services
         {
             var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
 
-            var shoppingCartItems = shoppingCarts.Where(c => c.CartId == cartId && c.EventId == eventId && c.SeatId == seatId).ToList();
+            var shoppingCartItems = await shoppingCarts.Where(c => c.CartId == cartId && c.EventId == eventId && c.SeatId == seatId).ToListAsync();
 
             foreach (var item in shoppingCartItems)
             {
@@ -110,7 +110,7 @@ namespace Ticketing.BAL.Services
         public async Task<IEnumerable<ShoppingCartReturnModel>> CartItemsAsync(Guid cartId)
         {
              var items = await _repositoryShoppingCart.GetAllAsync();
-            return items.Where(i => i.CartId == cartId).AsQueryable().ProjectToType<ShoppingCartReturnModel>().ToList();
+            return items.Where(i => i.CartId == cartId).ProjectToType<ShoppingCartReturnModel>().ToList();
         }
     }
 }

@@ -12,7 +12,7 @@ namespace Ticketing.BAL.Contracts
 {
     public interface ICartService
     {
-        public Task<CartStateReturnModel> AddSeatToCartAsync(Guid CartId, OrderCartModel orderCartModel);
+        public Task<CartStateReturnModel> AddSeatToCartAsync(Guid cartId, OrderCartModel orderCartModel);
 
         public Task<int> BookSeatToCartAsync(Guid cartId);
 

@@ -32,7 +32,7 @@ namespace Ticketing.BAL.Services
         public async Task<IEnumerable<EventReturnModel>> GetEventsAsync()
         {
             var events = await _repositoryEvent.GetAllAsync();
-            return events.AsQueryable().ProjectToType<EventReturnModel>().ToList();
+            return events.ProjectToType<EventReturnModel>().ToList();
         }
 
         public async Task<List<SeatReturnModel>> GetSeatsAsync(int eventId, int sectionId)
@@ -60,7 +60,7 @@ namespace Ticketing.BAL.Services
                               NameSeatStatus = seatStatus.Name,
                               shoppingCart.PriceTypeId,
                               NamePriceType = priceType.Name
-                          }).AsQueryable().ProjectToType<SeatReturnModel>().ToList();
+                          }).ProjectToType<SeatReturnModel>().ToList();
 
             return result;
         }

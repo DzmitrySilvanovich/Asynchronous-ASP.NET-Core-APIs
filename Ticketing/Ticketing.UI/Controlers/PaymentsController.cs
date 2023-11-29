@@ -27,7 +27,7 @@ namespace Ticketing.UI.Controlers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(int id)
         {
-            var res = await _paymentService.GetPaymentSatatusAsync(id);
+            var res = await _paymentService.GetPaymentStatusAsync(id);
 
             if (res is null)
             {
@@ -59,7 +59,7 @@ namespace Ticketing.UI.Controlers
         [HttpPut("{id}/failed")]
         public async Task<IActionResult> PutFailedAsync(int id)
         {
-            await _paymentService.FailedPaymentAsync(id);
+            await _paymentService.FailPaymentAsync(id);
             return NoContent();
         }
     }

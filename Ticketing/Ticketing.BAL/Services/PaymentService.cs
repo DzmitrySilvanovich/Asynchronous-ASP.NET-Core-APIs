@@ -27,7 +27,7 @@ namespace Ticketing.BAL.Services
             _repositorySeat = repositorySeat;
         }
 
-        public async Task<PaymentStatusReturnModel> GetPaymentSatatusAsync(int paymentId)
+        public async Task<PaymentStatusReturnModel> GetPaymentStatusAsync(int paymentId)
         {
             var returnPaymentStatus = new PaymentStatusReturnModel { Id = 0, Name = string.Empty};
 
@@ -77,7 +77,7 @@ namespace Ticketing.BAL.Services
             }
         }
 
-        public async Task FailedPaymentAsync(int paymentId)
+        public async Task FailPaymentAsync(int paymentId)
         {
             var payment = await _repositoryPayment.GetByIdAsync(paymentId);
 
