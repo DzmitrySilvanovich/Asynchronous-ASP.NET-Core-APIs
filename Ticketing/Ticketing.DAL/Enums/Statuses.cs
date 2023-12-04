@@ -8,7 +8,7 @@ namespace Ticketing.DAL.Enums
 {
     public class Statuses
     {
-        public enum PaymentState { NoPayment = 1, PartPpayment = 2, FullPayment = 3, PaymentFailed = 4 };
+        public enum PaymentState { NoPayment = 1, PartPayment = 2, FullPayment = 3, PaymentFailed = 4 };
         public enum SeatState { Available = 1, Booked = 2, Sold = 3 };
     }
 }

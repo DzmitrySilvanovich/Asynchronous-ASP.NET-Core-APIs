@@ -2,18 +2,18 @@
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 
-namespace Ticketing.UI.Controlers
+namespace Ticketing.UI.Controllers
 {
     /// <summary>
-    /// Orders API
+    /// Carts API
     /// </summary>
     [Route("api/[controller]/carts")]
     [ApiController]
-    public class OrdersController : ControllerBase
+    public class CartsController : ControllerBase
     {
         private readonly ICartService _cartService;
 
-        public OrdersController(ICartService cartService)
+        public CartsController(ICartService cartService)
         {
             _cartService = cartService;
 
@@ -24,7 +24,7 @@ namespace Ticketing.UI.Controlers
         /// <param name="id">Cart id</param>
         /// <returns>The collection of items of the cart</returns>
         /// <response code="200">Return a status of request</response>
-        /// <response code="400">Bad request</response>        
+        /// <response code="400">Bad request</response>
         /// </summary>
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(Guid id)
@@ -45,16 +45,16 @@ namespace Ticketing.UI.Controlers
 
         /// <summary>
         /// Add Seat To Cart.
-        /// <param name="Id">Cart id</param>
+        /// <param name="id">Cart id</param>
         /// <param name="orderCartModel">Payload for the action</param>
         /// <returns>The collection of items of the cart</returns>
         /// <response code="200">Return a status of request with result</response>
         /// <response code="400">Bad request</response>        
         /// </summary>
-        [HttpPost("{Id}")]
-         public async Task<IActionResult> Post(Guid Id, [FromBody] OrderCartModel orderCartModel)
+        [HttpPost("{id}")]
+         public async Task<IActionResult> Post(Guid id, [FromBody] OrderCartModel orderCartModel)
         {
-            var result = await _cartService.AddSeatToCartAsync(Id, orderCartModel);
+            var result = await _cartService.AddSeatToCartAsync(id, orderCartModel);
 
             if (result is null)
             {
@@ -74,6 +74,11 @@ namespace Ticketing.UI.Controlers
         {
             var result = await _cartService.BookSeatToCartAsync(cartId);
 
+            if(result == 0)
+            {
+                return BadRequest();
+            }
+
             return Ok(result);
         }
 
@@ -87,8 +92,14 @@ namespace Ticketing.UI.Controlers
         [HttpDelete("{cartId}/events/{eventId}/seats/{seatId}")]
         public async Task<IActionResult> DeleteAsync(Guid cartId, int eventId, int seatId)
         {
-            await _cartService.DeleteSeatForCartAsync(cartId, eventId, seatId);
-            return Ok();
+            var result = await _cartService.DeleteSeatForCartAsync(cartId, eventId, seatId);
+
+            if (!result)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
         }
     }
 }

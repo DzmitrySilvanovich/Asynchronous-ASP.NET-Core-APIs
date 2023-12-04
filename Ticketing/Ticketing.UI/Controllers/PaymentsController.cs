@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Ticketing.BAL.Contracts;
 
-namespace Ticketing.UI.Controlers
+namespace Ticketing.UI.Controllers
 {
     /// <summary>
     /// Payments API
@@ -46,8 +46,14 @@ namespace Ticketing.UI.Controlers
         [HttpPut("{id}/complete")]
         public async Task<IActionResult> PutCompleteAsync(int id)
         {
-            await _paymentService.CompletePaymentAsync(id);
-            return NoContent();
+            var res = await _paymentService.CompletePaymentAsync(id);
+
+            if (!res)
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
         }
 
         /// <summary>
@@ -59,8 +65,14 @@ namespace Ticketing.UI.Controlers
         [HttpPut("{id}/failed")]
         public async Task<IActionResult> PutFailedAsync(int id)
         {
-            await _paymentService.FailPaymentAsync(id);
-            return NoContent();
+            var res = await _paymentService.FailPaymentAsync(id);
+
+            if (!res)
+            {
+                return BadRequest(res);
+            }
+
+            return Ok(res);
         }
     }
 }

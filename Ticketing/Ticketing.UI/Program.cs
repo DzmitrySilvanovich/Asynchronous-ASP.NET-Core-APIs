@@ -49,6 +49,7 @@ builder.Services.AddScoped<IVenueService, VenueService>();
 builder.Services.AddScoped<IEventService, EventService>();
 builder.Services.AddScoped<ICartService, CartService>();
 builder.Services.AddScoped<IPaymentService, PaymentService>();
+builder.Services.AddScoped<IOrderService, OrderService>();
 
 builder.Services.AddScoped(typeof(Repository<>));
 
@@ -69,3 +70,4 @@ if (app.Environment.IsDevelopment())
 }
 
 app.Run();
+public partial class Program { }

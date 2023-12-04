@@ -2,7 +2,7 @@
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 
-namespace Ticketing.UI.Controlers
+namespace Ticketing.UI.Controllers
 {
     /// <summary>
     /// Events API

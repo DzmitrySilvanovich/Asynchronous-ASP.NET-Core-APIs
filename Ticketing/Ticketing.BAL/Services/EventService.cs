@@ -47,7 +47,7 @@ namespace Ticketing.BAL.Services
                           join shoppingCart in shoppingCarts.Where(sh => sh.EventId == eventId)
                           on seat.Id equals shoppingCart.SeatId
                           join seatStatus in seatStatuses
-                          on seat.SeatStatusId equals seatStatus.Id
+                          on seat.SeatStatusState equals seatStatus.Id
                           join priceType in priceTypes
                           on shoppingCart.PriceTypeId equals priceType.Id
                           select new
@@ -56,7 +56,7 @@ namespace Ticketing.BAL.Services
                               seat.SectionId,
                               seat.RowNumber,
                               seat.SeatNumber,
-                              seat.SeatStatusId,
+                              seat.SeatStatusState,
                               NameSeatStatus = seatStatus.Name,
                               shoppingCart.PriceTypeId,
                               NamePriceType = priceType.Name

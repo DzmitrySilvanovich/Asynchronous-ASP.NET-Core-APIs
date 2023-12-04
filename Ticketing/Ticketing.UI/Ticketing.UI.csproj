@@ -20,5 +20,4 @@
     <ProjectReference Include="..\Ticketing.BAL\Ticketing.BAL.csproj" />
     <ProjectReference Include="..\Ticketing.DAL\Ticketing.DAL.csproj" />
   </ItemGroup>
-
 </Project>
