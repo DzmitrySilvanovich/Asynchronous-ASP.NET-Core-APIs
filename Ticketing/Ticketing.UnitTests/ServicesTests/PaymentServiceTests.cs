@@ -59,9 +59,8 @@ namespace Ticketing.UnitTests.ServicesTests
         public async Task CompletePaymentAsync_Success()
         {
             var service = PrepareDataForSuccess();
-            var result = await service.CompletePaymentAsync(1);
+            await service.CompletePaymentAsync(1);
 
-            Assert.True(result);
             _mockPaymentRepository.Verify((p) => p.UpdateAsync(It.IsAny<Payment>()), Times.Once, ".Update payment is fail");
             _mockSeatRepository.Verify((p) => p.UpdateAsync(It.IsAny<Seat>()), Times.Once, ".Update seat is fail");
         }
@@ -70,9 +69,8 @@ namespace Ticketing.UnitTests.ServicesTests
         public async Task FailPaymentAsync_Success()
         {
             var service = PrepareDataForSuccess();
-            var result = await service.FailPaymentAsync(1);
+            await service.FailPaymentAsync(1);
 
-            Assert.True(result);
             _mockPaymentRepository.Verify((p) => p.UpdateAsync(It.IsAny<Payment>()), Times.Once, ".Update payment is fail");
             _mockSeatRepository.Verify((p) => p.UpdateAsync(It.IsAny<Seat>()), Times.Once, ".Update seat is fail");
         }
@@ -109,9 +107,10 @@ namespace Ticketing.UnitTests.ServicesTests
         public async Task CompletePaymentAsync_Fail(int Id)
         {
             var service = PrepareDataForSuccess();
-            var result = await service.CompletePaymentAsync(Id);
+            await service.CompletePaymentAsync(Id);
 
-            Assert.False(result);
+            _mockPaymentRepository.Verify((p) => p.UpdateAsync(It.IsAny<Payment>()), Times.Never, ".Update payment is fail");
+            _mockSeatRepository.Verify((p) => p.UpdateAsync(It.IsAny<Seat>()), Times.Never, ".Update seat is fail");
         }
 
         [Theory]
@@ -119,22 +118,18 @@ namespace Ticketing.UnitTests.ServicesTests
         public async Task FailPaymentAsync_Fail(int Id)
         {
             var service = PrepareDataForSuccess();
-            var result = await service.FailPaymentAsync(Id);
+            await service.FailPaymentAsync(Id);
 
-            Assert.False(result);
+            _mockPaymentRepository.Verify((p) => p.UpdateAsync(It.IsAny<Payment>()), Times.Never, ".Update payment is fail");
+            _mockSeatRepository.Verify((p) => p.UpdateAsync(It.IsAny<Seat>()), Times.Never, ".Update seat is fail");
         }
 
         public static PaymentService PrepareDataForSuccess()
         {
-            payments = DataHelper.PaymentsInitialization();
-            paymentStatuses = DataHelper.PaymentStatusesInitialization();
-            shoppingCarts = DataHelper.ShoppingCartsInitialization();
-            seats = DataHelper.SeatsInitialization();
-
-            var mockPaymentSet = MockDbSet.BuildAsync(payments);
-            var mockPaymentStatusSet = MockDbSet.BuildAsync(paymentStatuses);
-            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts);
-            var mockSeatSet = MockDbSet.BuildAsync(seats);
+            var mockPaymentSet = MockDbSet.BuildAsync(payments = DataHelper.PaymentsInitialization());
+            var mockPaymentStatusSet = MockDbSet.BuildAsync(paymentStatuses = DataHelper.PaymentStatusesInitialization());
+            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts = DataHelper.ShoppingCartsInitialization());
+            var mockSeatSet = MockDbSet.BuildAsync(seats = DataHelper.SeatsInitialization());
 
             mockPaymentSet.Setup(m => m.FindAsync(It.IsAny<object[]>()))
                        .Returns((object[] r) => new ValueTask<Payment>(payments.FirstOrDefault(b => b.Id == (int)r[0])));
@@ -152,10 +147,10 @@ namespace Ticketing.UnitTests.ServicesTests
             _mockShoppingCartRepository = new Mock<Repository<ShoppingCart>>(mockContext.Object);
             _mockSeatRepository = new Mock<Repository<Seat>>(mockContext.Object);
 
-            _mockPaymentRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockPaymentSet.Object);
-            _mockPaymentStatusRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockPaymentStatusSet.Object);
-            _mockShoppingCartRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            _mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
+            _mockPaymentRepository.Setup(c => c.GetAll()).Returns(mockPaymentSet.Object);
+            _mockPaymentStatusRepository.Setup(c => c.GetAll()).Returns(mockPaymentStatusSet.Object);
+            _mockShoppingCartRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            _mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
 
             _mockPaymentRepository.Setup(c => c.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int i) => payments.FirstOrDefault(p => p.Id == i));
             _mockPaymentStatusRepository.Setup(c => c.GetByIdAsync(It.IsAny<PaymentState>()))
@@ -168,15 +163,10 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static PaymentService PrepareDataForFail()
         {
-            payments = new List<Payment>();
-            paymentStatuses = new List<PaymentStatus>();
-            shoppingCarts = new List<ShoppingCart>();
-            seats = new List<Seat>();
-
-            var mockPaymentSet = MockDbSet.BuildAsync(payments);
-            var mockPaymentStatusSet = MockDbSet.BuildAsync(paymentStatuses);
-            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts);
-            var mockSeatSet = MockDbSet.BuildAsync(seats);
+            var mockPaymentSet = MockDbSet.BuildAsync(payments = new List<Payment>());
+            var mockPaymentStatusSet = MockDbSet.BuildAsync(paymentStatuses = new List<PaymentStatus>());
+            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts = new List<ShoppingCart>());
+            var mockSeatSet = MockDbSet.BuildAsync(seats = new List<Seat>());
 
             mockPaymentSet.Setup(m => m.FindAsync(It.IsAny<object[]>()))
                        .Returns((object[] r) => new ValueTask<Payment>(payments.FirstOrDefault(b => b.Id == (int)r[0])));
@@ -194,10 +184,10 @@ namespace Ticketing.UnitTests.ServicesTests
             _mockShoppingCartRepository = new Mock<Repository<ShoppingCart>>(mockContext.Object);
             _mockSeatRepository = new Mock<Repository<Seat>>(mockContext.Object);
 
-            _mockPaymentRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockPaymentSet.Object);
-            _mockPaymentStatusRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockPaymentStatusSet.Object);
-            _mockShoppingCartRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            _mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
+            _mockPaymentRepository.Setup(c => c.GetAll()).Returns(mockPaymentSet.Object);
+            _mockPaymentStatusRepository.Setup(c => c.GetAll()).Returns(mockPaymentStatusSet.Object);
+            _mockShoppingCartRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            _mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
 
             _mockPaymentRepository.Setup(c => c.GetByIdAsync(It.IsAny<int>())).ReturnsAsync((int i) => payments.Single(p => p.Id == i));
             _mockPaymentStatusRepository.Setup(c => c.GetByIdAsync(It.IsAny<PaymentState>()))

@@ -49,76 +49,62 @@ namespace Ticketing.BAL.Services
             return paymentStatus.Adapt(returnPaymentStatus);
         }
 
-        public async Task<bool> CompletePaymentAsync(int paymentId)
+        public async Task CompletePaymentAsync(int paymentId)
         {
             var payment = await _repositoryPayment.GetByIdAsync(paymentId);
 
             if (payment is null)
             {
-                return false;
+                return;
             }
 
             payment.PaymentStatusId = PaymentState.FullPayment;
             await _repositoryPayment.UpdateAsync(payment);
 
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
 
             var shoppingCartItems = shoppingCarts.Where(c => c.CartId == payment.CartId).ToList();
 
             var shoppingCartSeats = shoppingCartItems.Select(sh => sh.SeatId).ToList();
-
-            var allSeats = await _repositorySeat.GetAllAsync();
+                
+            var allSeats = _repositorySeat.GetAll();
 
             var seats = allSeats.Where(s => shoppingCartSeats.Contains(s.Id));
-
-            if (!seats.Any())
-            {
-                return false;
-            }
 
             foreach (var seat in seats)
             {
                 seat.SeatStatusState = SeatState.Sold;
                 await _repositorySeat.UpdateAsync(seat);
             }
-
-            return true;
         }
 
-        public async Task<bool> FailPaymentAsync(int paymentId)
+        public async Task FailPaymentAsync(int paymentId)
         {
             var payment = await _repositoryPayment.GetByIdAsync(paymentId);
 
             if (payment is null)
             {
-                return false;
+                return;
             }
 
             payment.PaymentStatusId = PaymentState.PaymentFailed;
             await _repositoryPayment.UpdateAsync(payment);
 
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts =  _repositoryShoppingCart.GetAll();
 
             var shoppingCartItems = shoppingCarts.Where(c => c.CartId == payment.CartId).ToList();
 
             var shoppingCartSeats = shoppingCartItems.Select(sh => sh.SeatId).ToList();
 
-            var allSeats = await _repositorySeat.GetAllAsync();
+            var allSeats = _repositorySeat.GetAll();
 
             var seats = allSeats.Where(s => shoppingCartSeats.Contains(s.Id));
-
-            if (!seats.Any())
-            {
-                return false;
-            }
 
             foreach (var seat in seats)
             {
                 seat.SeatStatusState = SeatState.Available;
                 await _repositorySeat.UpdateAsync(seat);
             }
-
-            return true;
         }
     }
 }

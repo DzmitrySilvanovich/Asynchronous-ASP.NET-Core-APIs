@@ -101,9 +101,7 @@ namespace Ticketing.UnitTests.ServicesTests
         {
             var service = PrepareDataForSuccess();
 
-            var result = await service.DeleteSeatForCartAsync(new Guid("F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"), 1, 1);
-
-            Assert.True(result);
+            await service.DeleteSeatForCartAsync(new Guid("F9168C5E-CEB2-4faa-B6BF-329BF39FA1E4"), 1, 1);
 
             _mockShoppingCartsRepository.Verify((p) => p.DeleteAsync(It.IsAny<ShoppingCart>()), Times.Once, ".Delete ShoppingCart is fail");
         }
@@ -151,7 +149,9 @@ namespace Ticketing.UnitTests.ServicesTests
 
             var result = await service.BookSeatToCartAsync(Guid.NewGuid());
 
-            Assert.Equal(0, result);
+            Assert.Equal(15, result);
+
+            _mockShoppingCartsRepository.Verify((p) => p.DeleteAsync(It.IsAny<ShoppingCart>()), Times.Never, ".Delete ShoppingCart is fail");
         }
 
         [Fact]
@@ -159,9 +159,9 @@ namespace Ticketing.UnitTests.ServicesTests
         {
             var service = PrepareDataForSuccess();
 
-            var result = await service.DeleteSeatForCartAsync(Guid.NewGuid(), 1, 1);
+            await service.DeleteSeatForCartAsync(Guid.NewGuid(), 1, 1);
 
-            Assert.False(result);
+            _mockSeatRepository.Verify((p) => p.UpdateAsync(It.IsAny<Seat>()), Times.Never, ".Delete ShoppingCart is fail");
         }
 
         [Fact]
@@ -176,12 +176,9 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static CartService PrepareDataForSuccess()
         {
-            _payments = DataHelper.PaymentsInitialization();
-            _shoppingCarts = DataHelper.ShoppingCartsInitialization();
-            _seats = DataHelper.SeatsInitialization();
-            var mockPaymentSet = MockDbSet.BuildAsync(_payments);
-            var mockShoppingCartSet = MockDbSet.BuildAsync(_shoppingCarts);
-            var mockSeatSet = MockDbSet.BuildAsync(_seats);
+            var mockPaymentSet = MockDbSet.BuildAsync(_payments = DataHelper.PaymentsInitialization());
+            var mockShoppingCartSet = MockDbSet.BuildAsync(_shoppingCarts = DataHelper.ShoppingCartsInitialization());
+            var mockSeatSet = MockDbSet.BuildAsync(_seats = DataHelper.SeatsInitialization());
 
             var mockContext = new Mock<ApplicationContext>();
             mockContext.Setup<Microsoft.EntityFrameworkCore.DbSet<Payment>>(c => c.Payments).Returns(mockPaymentSet.Object);
@@ -192,10 +189,10 @@ namespace Ticketing.UnitTests.ServicesTests
             _mockShoppingCartsRepository = new Mock<Repository<ShoppingCart>>(mockContext.Object);
             _mockSeatRepository = new Mock<Repository<Seat>>(mockContext.Object);
 
-            _mockShoppingCartsRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            _mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
-            _mockShoppingCartsRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            _mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
+            _mockShoppingCartsRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            _mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
+            _mockShoppingCartsRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            _mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
 
             var service = new CartService(_mockShoppingCartsRepository.Object, _mockSeatRepository.Object, _mockPaymentRepository.Object);
 
@@ -204,13 +201,9 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static CartService PrepareDataForFail()
         {
-            _payments = new List<Payment>();
-            _shoppingCarts = new List<ShoppingCart>();
-            _seats = new List<Seat>();
-
-            var mockPaymentSet = MockDbSet.BuildAsync(_payments);
-            var mockShoppingCartSet = MockDbSet.BuildAsync(_shoppingCarts);
-            var mockSeatSet = MockDbSet.BuildAsync(_seats);
+            var mockPaymentSet = MockDbSet.BuildAsync(_payments = new List<Payment>());
+            var mockShoppingCartSet = MockDbSet.BuildAsync(_shoppingCarts = new List<ShoppingCart>());
+            var mockSeatSet = MockDbSet.BuildAsync(_seats = new List<Seat>());
 
             var mockContext = new Mock<ApplicationContext>();
             mockContext.Setup<Microsoft.EntityFrameworkCore.DbSet<Payment>>(c => c.Payments).Returns(mockPaymentSet.Object);
@@ -221,10 +214,10 @@ namespace Ticketing.UnitTests.ServicesTests
             _mockShoppingCartsRepository = new Mock<Repository<ShoppingCart>>(mockContext.Object);
             _mockSeatRepository = new Mock<Repository<Seat>>(mockContext.Object);
 
-            _mockShoppingCartsRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            _mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
-            _mockShoppingCartsRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            _mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
+            _mockShoppingCartsRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            _mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
+            _mockShoppingCartsRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            _mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
 
             var service = new CartService(_mockShoppingCartsRepository.Object, _mockSeatRepository.Object, _mockPaymentRepository.Object);
 

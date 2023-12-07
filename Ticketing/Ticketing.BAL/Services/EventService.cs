@@ -31,17 +31,17 @@ namespace Ticketing.BAL.Services
 
         public async Task<IEnumerable<EventReturnModel>> GetEventsAsync()
         {
-            var events = await _repositoryEvent.GetAllAsync();
+            var events = _repositoryEvent.GetAll();
             return events.ProjectToType<EventReturnModel>().ToList();
         }
 
         public async Task<List<SeatReturnModel>> GetSeatsAsync(int eventId, int sectionId)
         {
-            var seatStatuses = await _repositorySeatStatus.GetAllAsync();
-            var priceTypes = await _repositoryPriceType.GetAllAsync();
+            var seatStatuses = _repositorySeatStatus.GetAll();
+            var priceTypes = _repositoryPriceType.GetAll();
 
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
-            var seats = await _repositorySeat.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
+            var seats = _repositorySeat.GetAll();
 
             var result = (from seat in seats.Where(s => s.SectionId == sectionId)
                           join shoppingCart in shoppingCarts.Where(sh => sh.EventId == eventId)

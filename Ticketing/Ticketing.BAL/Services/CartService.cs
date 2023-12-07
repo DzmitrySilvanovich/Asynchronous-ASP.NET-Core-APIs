@@ -25,7 +25,7 @@ namespace Ticketing.BAL.Services
 
         public async Task<CartStateReturnModel> AddSeatToCartAsync(Guid cartId, OrderCartModel orderCartModel)
         {
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
 
             var item = shoppingCarts.FirstOrDefault(c => c.CartId == cartId && c.EventId == orderCartModel.EventId && c.SeatId == orderCartModel.SeatId);
 
@@ -65,25 +65,12 @@ namespace Ticketing.BAL.Services
 
         public async Task<int> BookSeatToCartAsync(Guid cartId)
         {
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
-
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
             var shoppingCartItems = shoppingCarts.Where(c => c.CartId == cartId).ToList();
-
-            if (!shoppingCartItems.Any())
-            {
-                return 0;
-            }
-
             var shoppingCartSeats = shoppingCartItems.Select(sh => sh.SeatId).ToList();
 
-            var allSeats = await _repositorySeat.GetAllAsync();
-
+            var allSeats = _repositorySeat.GetAll();
             var seats = allSeats.Where(s => shoppingCartSeats.Contains(s.Id));
-
-            if (!seats.Any())
-            {
-                return 0;
-            }
 
             decimal totalAmount = shoppingCartItems.Sum(i => i.Price);
 
@@ -105,28 +92,21 @@ namespace Ticketing.BAL.Services
             return newPayment.Id;
         }
 
-        public async Task<bool> DeleteSeatForCartAsync(Guid cartId, int eventId, int seatId)
+        public async Task DeleteSeatForCartAsync(Guid cartId, int eventId, int seatId)
         {
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
 
             var shoppingCartItems = await shoppingCarts.Where(c => c.CartId == cartId && c.EventId == eventId && c.SeatId == seatId).ToListAsync();
-
-            if (!shoppingCartItems.Any())
-            {
-                return false;
-            }
 
             foreach (var item in shoppingCartItems)
             {
                 await _repositoryShoppingCart.DeleteAsync(item);
             }
-
-            return true;
         }
 
         public async Task<IEnumerable<ShoppingCartReturnModel>> CartItemsAsync(Guid cartId)
         {
-            var items = await _repositoryShoppingCart.GetAllAsync();
+            var items = _repositoryShoppingCart.GetAll();
             return items.Where(i => i.CartId == cartId).ProjectToType<ShoppingCartReturnModel>().ToList();
         }
     }

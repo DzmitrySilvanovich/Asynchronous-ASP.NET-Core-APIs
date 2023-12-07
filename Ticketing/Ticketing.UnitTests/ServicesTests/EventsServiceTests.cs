@@ -17,6 +17,12 @@ namespace Ticketing.UnitTests.ServicesTests
 {
     public class EventsServiceTests
     {
+        private static List<Event> events;
+        private static List<SeatStatus> seatStatuses;
+        private static List<PriceType> priceType;
+        private static List<ShoppingCart> shoppingCarts;
+        private static List<Seat> seats;
+
         [Fact]
         public async Task GetEventsAsync_Success()
         {
@@ -71,17 +77,11 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static EventService PrepareDataForSuccess()
         {
-            var events = DataHelper.EventsInitialization();
-            var seatStatuses = DataHelper.SeatStatusesInitialization();
-            var priceType = DataHelper.PriceTypesInitialization();
-            var shoppingCarts = DataHelper.ShoppingCartsInitialization();
-            var seats = DataHelper.SeatsInitialization();
-
-            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts);
-            var mockSeatSet = MockDbSet.BuildAsync(seats);
-            var mockEventSet = MockDbSet.BuildAsync(events);
-            var mockSeatStatusSet = MockDbSet.BuildAsync(seatStatuses);
-            var mockPriceTypeSet = MockDbSet.BuildAsync(priceType);
+            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts = DataHelper.ShoppingCartsInitialization());
+            var mockSeatSet = MockDbSet.BuildAsync(seats = DataHelper.SeatsInitialization());
+            var mockEventSet = MockDbSet.BuildAsync(events = DataHelper.EventsInitialization());
+            var mockSeatStatusSet = MockDbSet.BuildAsync(seatStatuses = DataHelper.SeatStatusesInitialization());
+            var mockPriceTypeSet = MockDbSet.BuildAsync(priceType = DataHelper.PriceTypesInitialization());
 
             var mockContext = new Mock<ApplicationContext>();
             mockContext.Setup<DbSet<ShoppingCart>>(c => c.ShoppingCarts).Returns(mockShoppingCartSet.Object);
@@ -96,11 +96,11 @@ namespace Ticketing.UnitTests.ServicesTests
             Mock<Repository<PriceType>> mockPriceTypeRepository = new Mock<Repository<PriceType>>(mockContext.Object);
             Mock<Repository<SeatStatus>> mockSeatStatusRepository = new Mock<Repository<SeatStatus>>(mockContext.Object);
 
-            mockShoppingCartsRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            mockEventRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockEventSet.Object);
-            mockSeatRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatSet.Object);
-            mockPriceTypeRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockPriceTypeSet.Object);
-            mockSeatStatusRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatStatusSet.Object);
+            mockShoppingCartsRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            mockEventRepository.Setup(c => c.GetAll()).Returns(mockEventSet.Object);
+            mockSeatRepository.Setup(c => c.GetAll()).Returns(mockSeatSet.Object);
+            mockPriceTypeRepository.Setup(c => c.GetAll()).Returns(mockPriceTypeSet.Object);
+            mockSeatStatusRepository.Setup(c => c.GetAll()).Returns(mockSeatStatusSet.Object);
 
             var service = new EventService(mockEventRepository.Object,
                 mockSeatRepository.Object,
@@ -113,18 +113,11 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static EventService PrepareDataForFail()
         {
-            var events = DataHelper.EventsInitialization();
-            var seatStatuses = DataHelper.SeatStatusesInitialization();
-            var priceType = DataHelper.PriceTypesInitialization();
-            var shoppingCarts = DataHelper.ShoppingCartsInitialization();
-            var seats = DataHelper.SeatsInitialization();
-
-
-            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts);
-            var mockSeatSet = MockDbSet.BuildAsync(seats);
-            var mockEventSet = MockDbSet.BuildAsync(events);
-            var mockSeatStatusSet = MockDbSet.BuildAsync(seatStatuses);
-            var mockPriceTypeSet = MockDbSet.BuildAsync(priceType);
+            var mockShoppingCartSet = MockDbSet.BuildAsync(shoppingCarts = DataHelper.ShoppingCartsInitialization());
+            var mockSeatSet = MockDbSet.BuildAsync(seats = DataHelper.SeatsInitialization());
+            var mockEventSet = MockDbSet.BuildAsync(events = DataHelper.EventsInitialization());
+            var mockSeatStatusSet = MockDbSet.BuildAsync(seatStatuses = DataHelper.SeatStatusesInitialization());
+            var mockPriceTypeSet = MockDbSet.BuildAsync(priceType = DataHelper.PriceTypesInitialization());
 
             var mockContext = new Mock<ApplicationContext>();
             mockContext.Setup<DbSet<ShoppingCart>>(c => c.ShoppingCarts).Returns(mockShoppingCartSet.Object);
@@ -139,9 +132,9 @@ namespace Ticketing.UnitTests.ServicesTests
             Mock<Repository<PriceType>> mockPriceTypeRepository = new Mock<Repository<PriceType>>(mockContext.Object);
             Mock<Repository<SeatStatus>> mockSeatStatusRepository = new Mock<Repository<SeatStatus>>(mockContext.Object);
 
-            mockShoppingCartsRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockShoppingCartSet.Object);
-            mockPriceTypeRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockPriceTypeSet.Object);
-            mockSeatStatusRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSeatStatusSet.Object);
+            mockShoppingCartsRepository.Setup(c => c.GetAll()).Returns(mockShoppingCartSet.Object);
+            mockPriceTypeRepository.Setup(c => c.GetAll()).Returns(mockPriceTypeSet.Object);
+            mockSeatStatusRepository.Setup(c => c.GetAll()).Returns(mockSeatStatusSet.Object);
 
             var service = new EventService(mockEventRepository.Object,
                 mockSeatRepository.Object,

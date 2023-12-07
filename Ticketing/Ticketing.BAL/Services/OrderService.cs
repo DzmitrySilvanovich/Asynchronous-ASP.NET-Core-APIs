@@ -34,7 +34,7 @@ namespace Ticketing.BAL.Services
                 return false;
             }
 
-            var allCarts = await _repositoryShoppingCart.GetAllAsync();
+            var allCarts = _repositoryShoppingCart.GetAll();
             var carts = allCarts.Where( c => c.CartId == order.CartId).ToList();
 
             if (!carts.Any())
@@ -42,7 +42,7 @@ namespace Ticketing.BAL.Services
                 return false;
             }
 
-            var seats = await _repositorySeat.GetAllAsync();
+            var seats = _repositorySeat.GetAll();
 
             var selectedSeats = carts.Join(seats,
                 cart => cart.SeatId,

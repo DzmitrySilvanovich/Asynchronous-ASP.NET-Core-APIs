@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 
 namespace Ticketing.UnitTests.Helpers
 {
-
     internal class TestAsyncQueryProvider<TEntity> : IAsyncQueryProvider
     {
         private readonly IQueryProvider _inner;

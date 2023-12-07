@@ -19,6 +19,9 @@ namespace Ticketing.UnitTests.ServicesTests
 {
     public class VenueServiceTests
     {
+        static private List<Venue> venues = new List<Venue>();
+        static private List<Section> sections = new List<Section>();
+
         [Fact]
         public async Task GetVenuesAsync_Success()
         {
@@ -68,11 +71,8 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static VenueService PrepareDataForSuccess()
         {
-            var venues = DataHelper.VenuesInitialization();
-            var sections = DataHelper.SectionsInitialization();
-
-            var mockVenueSet = MockDbSet.BuildAsync(venues);
-            var mockSectionSet = MockDbSet.BuildAsync(sections);
+            var mockVenueSet = MockDbSet.BuildAsync(venues = DataHelper.VenuesInitialization());
+            var mockSectionSet = MockDbSet.BuildAsync(sections = DataHelper.SectionsInitialization());
 
             var mockContext = new Mock<ApplicationContext>();
             mockContext.Setup<DbSet<Venue>>(c => c.Venues).Returns(mockVenueSet.Object);
@@ -81,8 +81,8 @@ namespace Ticketing.UnitTests.ServicesTests
             Mock<Repository<Venue>> mockVenueRepository = new Mock<Repository<Venue>>(mockContext.Object);
             Mock<Repository<Section>> mockSectionRepository = new Mock<Repository<Section>>(mockContext.Object);
 
-            mockVenueRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockVenueSet.Object);
-            mockSectionRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSectionSet.Object);
+            mockVenueRepository.Setup(c => c.GetAll()).Returns(mockVenueSet.Object);
+            mockSectionRepository.Setup(c => c.GetAll()).Returns(mockSectionSet.Object);
 
             var service = new VenueService(mockVenueRepository.Object, mockSectionRepository.Object);
 
@@ -91,11 +91,8 @@ namespace Ticketing.UnitTests.ServicesTests
 
         public static VenueService PrepareDataForFail()
         {
-            var venues = new List<Venue>();
-            var sections = new List<Section>();
-
-            var mockVenueSet = MockDbSet.BuildAsync(venues);
-            var mockSectionSet = MockDbSet.BuildAsync(sections);
+            var mockVenueSet = MockDbSet.BuildAsync(venues = new List<Venue>());
+            var mockSectionSet = MockDbSet.BuildAsync(sections = new List<Section>());
 
             var mockContext = new Mock<ApplicationContext>();
             mockContext.Setup<DbSet<Venue>>(c => c.Venues).Returns(mockVenueSet.Object);
@@ -104,8 +101,8 @@ namespace Ticketing.UnitTests.ServicesTests
             Mock<Repository<Venue>> mockVenueRepository = new Mock<Repository<Venue>>(mockContext.Object);
             Mock<Repository<Section>> mockSectionRepository = new Mock<Repository<Section>>(mockContext.Object);
 
-            mockVenueRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockVenueSet.Object);
-            mockSectionRepository.Setup(c => c.GetAllAsync()).ReturnsAsync(mockSectionSet.Object);
+            mockVenueRepository.Setup(c => c.GetAll()).Returns(mockVenueSet.Object);
+            mockSectionRepository.Setup(c => c.GetAll()).Returns(mockSectionSet.Object);
 
             var service = new VenueService(mockVenueRepository.Object, mockSectionRepository.Object);
 

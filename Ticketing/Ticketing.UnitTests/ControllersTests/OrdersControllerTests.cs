@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using System;
@@ -25,12 +26,13 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<IOrderService> service = new Mock<IOrderService>();
 
-            service.Setup(s => s.ReleaseCartsFromOrderAsync(It.IsAny<int>())).Returns(Task.FromResult(true));
+            service.Setup(s => s.ReleaseCartsFromOrderAsync(1)).Returns(Task.FromResult(true));
 
             var controller = new OrdersController(service.Object);
             var result = await controller.DeleteAsync(1);
 
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -38,12 +40,13 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<IOrderService> service = new Mock<IOrderService>();
 
-            service.Setup(s => s.ReleaseCartsFromOrderAsync(It.IsAny<int>())).Returns(Task.FromResult(false));
+            service.Setup(s => s.ReleaseCartsFromOrderAsync(1)).Returns(Task.FromResult(false));
 
             var controller = new OrdersController(service.Object);
             var result = await controller.DeleteAsync(1);
 
             Assert.IsType<BadRequestObjectResult>(result);
+            result.Should().BeOfType<BadRequestObjectResult>();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -38,6 +39,7 @@ namespace Ticketing.UnitTests.ControllersTests
 
             service.Verify(u => u.GetEventsAsync(), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -56,6 +58,7 @@ namespace Ticketing.UnitTests.ControllersTests
 
             service.Verify(u => u.GetEventsAsync(), Times.Once, "fail");
             Assert.IsType<NoContentResult>(result);
+            result.Should().BeOfType<NoContentResult>();
         }
 
         [Fact]
@@ -67,13 +70,14 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<IEventService> service = new Mock<IEventService>();
 
-            service.Setup(s => s.GetSeatsAsync(It.IsAny<int>(), It.IsAny<int>())).Returns(Task.FromResult(collection));
+            service.Setup(s => s.GetSeatsAsync(1, 1)).Returns(Task.FromResult(collection));
 
             var controller = new EventsController(service.Object);
             var result = await controller.GetSeatsAsync(1,1);
 
-            service.Verify(u => u.GetSeatsAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once, "fail");
+            service.Verify(u => u.GetSeatsAsync(1, 1), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -85,13 +89,14 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<IEventService> service = new Mock<IEventService>();
 
-            service.Setup(s => s.GetSeatsAsync(It.IsAny<int>(), It.IsAny<int>())).Returns(Task.FromResult(collection));
+            service.Setup(s => s.GetSeatsAsync(1, 1)).Returns(Task.FromResult(collection));
 
             var controller = new EventsController(service.Object);
             var result = await controller.GetSeatsAsync(1, 1);
 
-            service.Verify(u => u.GetSeatsAsync(It.IsAny<int>(), It.IsAny<int>()), Times.Once, "fail");
+            service.Verify(u => u.GetSeatsAsync(1, 1), Times.Once, "fail");
             Assert.IsType<NoContentResult>(result);
+            result.Should().BeOfType<NoContentResult>();
         }
     }
 }

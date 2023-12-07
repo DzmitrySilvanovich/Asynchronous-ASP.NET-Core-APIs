@@ -30,7 +30,7 @@ namespace Ticketing.DAL.Repositories
         {
             if (!Database.GetService<IRelationalDatabaseCreator>().Exists())
             {
-               // Database.EnsureCreated();
+                Database.EnsureCreated();
             }
         }
 

@@ -11,8 +11,8 @@ namespace Ticketing.BAL.Contracts
     {
         Task<PaymentStatusReturnModel> GetPaymentStatusAsync(int paymentId);
 
-        Task<bool> CompletePaymentAsync(int paymentId);
+        Task CompletePaymentAsync(int paymentId);
 
-        Task<bool> FailPaymentAsync(int paymentId);
+        Task FailPaymentAsync(int paymentId);
     }
 }

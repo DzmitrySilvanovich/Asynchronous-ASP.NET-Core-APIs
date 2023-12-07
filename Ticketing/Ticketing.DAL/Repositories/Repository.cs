@@ -30,9 +30,10 @@ namespace Ticketing.DAL.Repositories
             return addedEntity.Entity;
         }
 
-        public virtual Task<IQueryable<T>> GetAllAsync()
+        public virtual IQueryable<T> GetAll()
         {
-            return Task.FromResult(_dbSet.AsQueryable());
+         //   return Task.FromResult(_dbSet.AsQueryable());
+            return _dbSet;
         }
 
         public virtual async ValueTask<T?> GetByIdAsync(object id)

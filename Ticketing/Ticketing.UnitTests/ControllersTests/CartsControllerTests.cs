@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -18,6 +19,8 @@ namespace Ticketing.UnitTests.ControllersTests
     {
         private readonly IFixture _fixture;
 
+        private readonly Guid guid = Guid.NewGuid();
+
         public CartsControllerTests()
         {
             _fixture = new Fixture();
@@ -32,13 +35,14 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<ICartService> service = new Mock<ICartService>();
 
-            service.Setup(s => s.CartItemsAsync(It.IsAny<Guid>())).ReturnsAsync(collection);
+            service.Setup(s => s.CartItemsAsync(guid)).ReturnsAsync(collection);
 
             var controller = new CartsController(service.Object);
-            var result = await controller.GetAsync(Guid.NewGuid());
+            var result = await controller.GetAsync(guid);
 
-            service.Verify(u => u.CartItemsAsync(It.IsAny<Guid>()), Times.Once, "fail");
+            service.Verify(u => u.CartItemsAsync(guid), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -50,29 +54,32 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<ICartService> service = new Mock<ICartService>();
 
-            service.Setup(s => s.CartItemsAsync(It.IsAny<Guid>())).ReturnsAsync(collection);
+            service.Setup(s => s.CartItemsAsync(guid)).ReturnsAsync(collection);
 
             var controller = new CartsController(service.Object);
-            var result = await controller.GetAsync(Guid.NewGuid());
+            var result = await controller.GetAsync(guid);
 
-            service.Verify(u => u.CartItemsAsync(It.IsAny<Guid>()), Times.Once, "fail");
+            service.Verify(u => u.CartItemsAsync(guid), Times.Once, "fail");
             Assert.IsType<NoContentResult>(result);
+            result.Should().BeOfType<NoContentResult>();
         }
 
         [Fact]
         public async Task Post_Succesc()
         {
             var model = _fixture.Build<CartStateReturnModel>().Create();
+            var orderCartModel = _fixture.Build<OrderCartModel>().Create();
 
             Mock<ICartService> service = new Mock<ICartService>();
 
-            service.Setup(s => s.AddSeatToCartAsync(It.IsAny<Guid>(), It.IsAny<OrderCartModel>())).Returns(Task.FromResult(model));
+            service.Setup(s => s.AddSeatToCartAsync(guid, orderCartModel)).Returns(Task.FromResult(model));
 
             var controller = new CartsController(service.Object);
-            var result = await controller.Post(Guid.NewGuid(), _fixture.Build<OrderCartModel>().Create());
+            var result = await controller.Post(guid, orderCartModel);
 
-            service.Verify(u => u.AddSeatToCartAsync(It.IsAny<Guid>(), It.IsAny<OrderCartModel>()), Times.Once, "fail");
+            service.Verify(u => u.AddSeatToCartAsync(guid, orderCartModel), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -82,13 +89,14 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<ICartService> service = new Mock<ICartService>();
 
-            service.Setup(s => s.BookSeatToCartAsync(It.IsAny<Guid>())).Returns(Task.FromResult(model));
+            service.Setup(s => s.BookSeatToCartAsync(guid)).Returns(Task.FromResult(model));
 
             var controller = new CartsController(service.Object);
-            var result = await controller.PutAsync(Guid.NewGuid());
+            var result = await controller.PutAsync(guid);
 
-            service.Verify(u => u.BookSeatToCartAsync(It.IsAny<Guid>()), Times.Once, "fail");
+            service.Verify(u => u.BookSeatToCartAsync(guid), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -96,39 +104,42 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<ICartService> service = new Mock<ICartService>();
 
-            service.Setup(s => s.BookSeatToCartAsync(It.IsAny<Guid>())).Returns(Task.FromResult(0));
+            service.Setup(s => s.BookSeatToCartAsync(guid)).Returns(Task.FromResult(0));
 
             var controller = new CartsController(service.Object);
-            var result = await controller.PutAsync(Guid.NewGuid());
+            var result = await controller.PutAsync(guid);
 
-            service.Verify(u => u.BookSeatToCartAsync(It.IsAny<Guid>()), Times.Once, "fail");
+            service.Verify(u => u.BookSeatToCartAsync(guid), Times.Once, "fail");
             Assert.IsType<BadRequestResult>(result);
+            result.Should().BeOfType<BadRequestResult>();
         }
 
         [Fact]
         public async Task DeleteAsync_Success()
         {
             Mock<ICartService> service = new Mock<ICartService>();
-            service.Setup(s => s.DeleteSeatForCartAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>())).Returns(Task.FromResult(true));
+            service.Setup(s => s.DeleteSeatForCartAsync(guid, 1, 1)).Returns(Task.CompletedTask);
             var controller = new CartsController(service.Object);
 
-            var result = await controller.DeleteAsync(Guid.NewGuid(), 1, 1);
+            var result = await controller.DeleteAsync(guid, 1, 1);
 
-            service.Verify(u => u.DeleteSeatForCartAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once, "fail");
-            Assert.IsType<OkObjectResult>(result);
+            service.Verify(u => u.DeleteSeatForCartAsync(guid, 1, 1), Times.Once, "fail");
+            Assert.IsType<OkResult>(result);
+            result.Should().BeOfType<OkResult>();
         }
 
         [Fact]
         public async Task DeleteAsync_Fail()
         {
             Mock<ICartService> service = new Mock<ICartService>();
-            service.Setup(s => s.DeleteSeatForCartAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>())).Returns(Task.FromResult(false));
+            service.Setup(s => s.DeleteSeatForCartAsync(guid, 1, 1)).Returns(Task.CompletedTask);
             var controller = new CartsController(service.Object);
 
-            var result = await controller.DeleteAsync(Guid.NewGuid(), 1, 1);
+            var result = await controller.DeleteAsync(guid, 1, 1);
 
-            service.Verify(u => u.DeleteSeatForCartAsync(It.IsAny<Guid>(), It.IsAny<int>(), It.IsAny<int>()), Times.Once, "fail");
-            Assert.IsType<BadRequestObjectResult > (result);
+            service.Verify(u => u.DeleteSeatForCartAsync(guid, 1, 1), Times.Once, "fail");
+            Assert.IsType<OkResult> (result);
+            result.Should().BeOfType<OkResult>();
         }
 
     }

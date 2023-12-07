@@ -1,4 +1,5 @@
 ﻿using AutoFixture;
+using FluentAssertions;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -31,14 +32,15 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<IPaymentService> service = new Mock<IPaymentService>();
 
-            service.Setup(s => s.GetPaymentStatusAsync(It.IsAny<int>())).Returns(Task.FromResult(model));
+            service.Setup(s => s.GetPaymentStatusAsync(1)).Returns(Task.FromResult(model));
 
             var controller = new PaymentsController(service.Object);
             var result = await controller.GetAsync(1);
 
-            service.Verify(u => u.GetPaymentStatusAsync(It.IsAny<int>()), Times.Once, "GetPaymentStatusAsync Fail");
+            service.Verify(u => u.GetPaymentStatusAsync(1), Times.Once, "GetPaymentStatusAsync Fail");
 
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -48,11 +50,12 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<IPaymentService> service = new Mock<IPaymentService>();
 
-            service.Setup(s => s.GetPaymentStatusAsync(It.IsAny<int>())).Returns(Task.FromResult(model));
+            service.Setup(s => s.GetPaymentStatusAsync(1)).Returns(Task.FromResult(model));
 
             var controller = new PaymentsController(service.Object);
             var result = await controller.GetAsync(1);
             Assert.IsType<BadRequestObjectResult>(result);
+            result.Should().BeOfType<BadRequestObjectResult>();
         }
 
         [Fact]
@@ -60,12 +63,14 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<IPaymentService> service = new Mock<IPaymentService>();
 
-            service.Setup(s => s.CompletePaymentAsync(It.IsAny<int>())).Returns(Task.FromResult(true));
+            service.Setup(s => s.CompletePaymentAsync(1)).Returns(Task.CompletedTask);
 
             var controller = new PaymentsController(service.Object);
             var result = await controller.PutCompleteAsync(1);
 
-            Assert.IsType<OkObjectResult>(result);
+            Assert.IsType<OkResult>(result);
+            service.Verify(u => u.CompletePaymentAsync(1), Times.Once, "fail");
+            result.Should().BeOfType<OkResult>();
         }
 
         [Fact]
@@ -73,11 +78,13 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<IPaymentService> service = new Mock<IPaymentService>();
 
-            service.Setup(s => s.CompletePaymentAsync(It.IsAny<int>())).Returns(Task.FromResult(false));
+            service.Setup(s => s.CompletePaymentAsync(1)).Returns(Task.CompletedTask);
 
             var controller = new PaymentsController(service.Object);
             var result = await controller.PutCompleteAsync(1);
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<OkResult>(result);
+            service.Verify(u => u.CompletePaymentAsync(1), Times.Once, "fail");
+            result.Should().BeOfType<OkResult>();
         }
 
         [Fact]
@@ -85,12 +92,14 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<IPaymentService> service = new Mock<IPaymentService>();
 
-            service.Setup(s => s.FailPaymentAsync(It.IsAny<int>())).Returns(Task.FromResult(true));
+            service.Setup(s => s.FailPaymentAsync(1)).Returns(Task.CompletedTask);
 
             var controller = new PaymentsController(service.Object);
             var result = await controller.PutFailedAsync(1);
 
-            Assert.IsType<OkObjectResult>(result);
+            Assert.IsType<OkResult>(result);
+            service.Verify(u => u.FailPaymentAsync(1), Times.Once, "fail");
+            result.Should().BeOfType<OkResult>();
         }
 
         [Fact]
@@ -98,12 +107,14 @@ namespace Ticketing.UnitTests.ControllersTests
         {
             Mock<IPaymentService> service = new Mock<IPaymentService>();
 
-            service.Setup(s => s.FailPaymentAsync(It.IsAny<int>())).Returns(Task.FromResult(false));
+            service.Setup(s => s.FailPaymentAsync(1)).Returns(Task.CompletedTask);
 
             var controller = new PaymentsController(service.Object);
-            var result = await controller.PutFailedAsync(1);
+            var result = await controller.PutFailedAsync(15);
 
-            Assert.IsType<BadRequestObjectResult>(result);
+            Assert.IsType<OkResult>(result);
+            service.Verify(u => u.FailPaymentAsync(15), Times.Once, "fail");
+            result.Should().BeOfType<OkResult>();
         }
     }
 }

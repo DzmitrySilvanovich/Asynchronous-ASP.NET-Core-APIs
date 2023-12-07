@@ -1,5 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Ticketing.BAL.Contracts;
+using Ticketing.BAL.Services;
+using Ticketing.DAL.Domain;
 
 namespace Ticketing.UI.Controllers
 {
@@ -46,14 +49,9 @@ namespace Ticketing.UI.Controllers
         [HttpPut("{id}/complete")]
         public async Task<IActionResult> PutCompleteAsync(int id)
         {
-            var res = await _paymentService.CompletePaymentAsync(id);
+            await _paymentService.CompletePaymentAsync(id);
 
-            if (!res)
-            {
-                return BadRequest(res);
-            }
-
-            return Ok(res);
+            return Ok();
         }
 
         /// <summary>
@@ -65,14 +63,9 @@ namespace Ticketing.UI.Controllers
         [HttpPut("{id}/failed")]
         public async Task<IActionResult> PutFailedAsync(int id)
         {
-            var res = await _paymentService.FailPaymentAsync(id);
+            await _paymentService.FailPaymentAsync(id);
 
-            if (!res)
-            {
-                return BadRequest(res);
-            }
-
-            return Ok(res);
+            return Ok();
         }
     }
 }

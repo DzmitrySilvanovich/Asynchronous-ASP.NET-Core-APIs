@@ -20,13 +20,13 @@ namespace Ticketing.BAL.Services
 
         public async Task<IEnumerable<VenueReturnModel>> GetVenuesAsync()
         {
-            var venues = await _repository.GetAllAsync();
+            var venues = _repository.GetAll();
             return venues.ProjectToType<VenueReturnModel>().ToList();
         }
 
         public async Task<IEnumerable<SectionReturnModel>> GetSectionsOfVenue(int venueId)
         {
-            var sections = await _repositorySection.GetAllAsync();
+            var sections = _repositorySection.GetAll();
             return sections.Where(s => s.VenueId == venueId).ProjectToType<SectionReturnModel>().ToList();
         }
     }

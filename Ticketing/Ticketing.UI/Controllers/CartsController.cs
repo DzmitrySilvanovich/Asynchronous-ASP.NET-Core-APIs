@@ -92,14 +92,9 @@ namespace Ticketing.UI.Controllers
         [HttpDelete("{cartId}/events/{eventId}/seats/{seatId}")]
         public async Task<IActionResult> DeleteAsync(Guid cartId, int eventId, int seatId)
         {
-            var result = await _cartService.DeleteSeatForCartAsync(cartId, eventId, seatId);
+            await _cartService.DeleteSeatForCartAsync(cartId, eventId, seatId);
 
-            if (!result)
-            {
-                return BadRequest(result);
-            }
-
-            return Ok(result);
+            return Ok();
         }
     }
 }

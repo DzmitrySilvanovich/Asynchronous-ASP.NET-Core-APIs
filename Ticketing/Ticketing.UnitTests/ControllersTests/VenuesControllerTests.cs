@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using Azure;
+using FluentAssertions;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -42,6 +43,7 @@ namespace Ticketing.UnitTests.ControllersTests
 
             service.Verify(u => u.GetVenuesAsync(), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -60,6 +62,7 @@ namespace Ticketing.UnitTests.ControllersTests
 
             service.Verify(u => u.GetVenuesAsync(), Times.Once, "fail");
             Assert.IsType<NoContentResult>(result);
+            result.Should().BeOfType<NoContentResult>();
         }
 
         [Fact]
@@ -71,13 +74,14 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<IVenueService> service = new Mock<IVenueService>();
 
-            service.Setup(s => s.GetSectionsOfVenue((It.IsAny<int>()))).ReturnsAsync(collection);
+            service.Setup(s => s.GetSectionsOfVenue(1)).ReturnsAsync(collection);
 
             var controller = new VenuesController(service.Object);
             var result = await controller.GetSectionsOfVenue(1);
 
-            service.Verify(u => u.GetSectionsOfVenue(It.IsAny<int>()), Times.Once, "fail");
+            service.Verify(u => u.GetSectionsOfVenue(1), Times.Once, "fail");
             Assert.IsType<OkObjectResult>(result);
+            result.Should().BeOfType<OkObjectResult>();
         }
 
         [Fact]
@@ -89,13 +93,14 @@ namespace Ticketing.UnitTests.ControllersTests
 
             Mock<IVenueService> service = new Mock<IVenueService>();
 
-            service.Setup(s => s.GetSectionsOfVenue((It.IsAny<int>()))).ReturnsAsync(collection);
+            service.Setup(s => s.GetSectionsOfVenue(1)).ReturnsAsync(collection);
 
             var controller = new VenuesController(service.Object);
             var result = await controller.GetSectionsOfVenue(1);
 
-            service.Verify(u => u.GetSectionsOfVenue(It.IsAny<int>()), Times.Once, "fail");
+            service.Verify(u => u.GetSectionsOfVenue(1), Times.Once, "fail");
             Assert.IsType<NoContentResult>(result);
+            result.Should().BeOfType<NoContentResult>();
         }
     }
 }
