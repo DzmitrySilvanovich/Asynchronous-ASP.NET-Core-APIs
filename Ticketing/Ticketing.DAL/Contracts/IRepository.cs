@@ -12,14 +12,14 @@ namespace Ticketing.DAL.Contracts
     {
         public Task<T> CreateAsync(T entity);
 
-        public Task<IQueryable<T>> GetAllAsync();
+        public IQueryable<T> GetAll();
 
-        public Task<T?> GetByIdAsync(object Id);
+        public ValueTask<T?> GetByIdAsync(object id);
 
         public Task UpdateAsync(T entity);
 
-        public Task DeleteAync(object Id);
+        public Task DeleteAsync(object id);
 
-        public Task DeleteAync(T entity);
+        public Task DeleteAsync(T entity);
     }
 }

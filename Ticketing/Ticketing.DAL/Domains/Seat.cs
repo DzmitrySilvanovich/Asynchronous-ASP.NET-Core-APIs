@@ -14,7 +14,7 @@ namespace Ticketing.DAL.Domain
         public int Id { get; set; }
         public int RowNumber { get; set; }
         public int SeatNumber { get; set; }
-        public SeatState SeatStatusId { get; set; }
+        public SeatState SeatStatusState { get; set; }
         public int SectionId { get; set; }
     }
 }

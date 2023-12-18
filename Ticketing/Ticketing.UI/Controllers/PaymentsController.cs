@@ -1,7 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Ticketing.BAL.Contracts;
+using Ticketing.BAL.Services;
+using Ticketing.DAL.Domain;
 
-namespace Ticketing.UI.Controlers
+namespace Ticketing.UI.Controllers
 {
     /// <summary>
     /// Payments API
@@ -47,7 +50,8 @@ namespace Ticketing.UI.Controlers
         public async Task<IActionResult> PutCompleteAsync(int id)
         {
             await _paymentService.CompletePaymentAsync(id);
-            return NoContent();
+
+            return Ok();
         }
 
         /// <summary>
@@ -60,7 +64,8 @@ namespace Ticketing.UI.Controlers
         public async Task<IActionResult> PutFailedAsync(int id)
         {
             await _paymentService.FailPaymentAsync(id);
-            return NoContent();
+
+            return Ok();
         }
     }
 }

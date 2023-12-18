@@ -14,7 +14,7 @@ namespace Ticketing.BAL.Model
         public int SectionId { get; set; }
         public int RowNumber { get; set; }
         public int SeatNumber { get; set; }
-        public SeatState SeatStatusId { get; set; }
+        public SeatState SeatStatusState { get; set; }
         public required string NameSeatStatus { get; set; }
         public int PriceTypeId { get; set; }
         public required string NamePriceType { get; set; }

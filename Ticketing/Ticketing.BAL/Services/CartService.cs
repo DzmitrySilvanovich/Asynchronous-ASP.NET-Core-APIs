@@ -12,9 +12,9 @@ namespace Ticketing.BAL.Services
 {
     public class CartService : ICartService
     {
-        readonly IRepository<ShoppingCart> _repositoryShoppingCart;
-        readonly IRepository<Seat> _repositorySeat;
-        readonly IRepository<Payment> _repositoryPayment;
+        private readonly IRepository<ShoppingCart> _repositoryShoppingCart;
+        private readonly IRepository<Seat> _repositorySeat;
+        private readonly IRepository<Payment> _repositoryPayment;
 
         public CartService(Repository<ShoppingCart> repository, Repository<Seat> repositorySeat, Repository<Payment> repositoryPayment)
         {
@@ -25,7 +25,7 @@ namespace Ticketing.BAL.Services
 
         public async Task<CartStateReturnModel> AddSeatToCartAsync(Guid cartId, OrderCartModel orderCartModel)
         {
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
 
             var item = shoppingCarts.FirstOrDefault(c => c.CartId == cartId && c.EventId == orderCartModel.EventId && c.SeatId == orderCartModel.SeatId);
 
@@ -65,21 +65,18 @@ namespace Ticketing.BAL.Services
 
         public async Task<int> BookSeatToCartAsync(Guid cartId)
         {
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
-
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
             var shoppingCartItems = shoppingCarts.Where(c => c.CartId == cartId).ToList();
-
             var shoppingCartSeats = shoppingCartItems.Select(sh => sh.SeatId).ToList();
 
-            var allSeats = await _repositorySeat.GetAllAsync();
-
+            var allSeats = _repositorySeat.GetAll();
             var seats = allSeats.Where(s => shoppingCartSeats.Contains(s.Id));
 
             decimal totalAmount = shoppingCartItems.Sum(i => i.Price);
 
             foreach (var seat in seats)
             {
-                seat.SeatStatusId = SeatState.Booked;
+                seat.SeatStatusState = SeatState.Booked;
                 await _repositorySeat.UpdateAsync(seat);
             }
 
@@ -97,19 +94,19 @@ namespace Ticketing.BAL.Services
 
         public async Task DeleteSeatForCartAsync(Guid cartId, int eventId, int seatId)
         {
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
 
             var shoppingCartItems = await shoppingCarts.Where(c => c.CartId == cartId && c.EventId == eventId && c.SeatId == seatId).ToListAsync();
 
             foreach (var item in shoppingCartItems)
             {
-                await _repositoryShoppingCart.DeleteAync(item);
+                await _repositoryShoppingCart.DeleteAsync(item);
             }
         }
 
         public async Task<IEnumerable<ShoppingCartReturnModel>> CartItemsAsync(Guid cartId)
         {
-             var items = await _repositoryShoppingCart.GetAllAsync();
+            var items = _repositoryShoppingCart.GetAll();
             return items.Where(i => i.CartId == cartId).ProjectToType<ShoppingCartReturnModel>().ToList();
         }
     }

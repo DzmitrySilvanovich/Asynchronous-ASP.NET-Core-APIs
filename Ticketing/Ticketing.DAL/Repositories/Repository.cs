@@ -22,39 +22,40 @@ namespace Ticketing.DAL.Repositories
             _dbSet = _db.Set<T>();
         }
 
-        public async Task<T> CreateAsync(T entity)
+        public virtual async Task<T> CreateAsync(T entity)
         {
-            EntityEntry<T> addedEentity = await _dbSet.AddAsync(entity);
+            EntityEntry<T> addedEntity = await _dbSet.AddAsync(entity);
 
             await _db.SaveChangesAsync();
-            return addedEentity.Entity;
+            return addedEntity.Entity;
         }
 
-        public Task<IQueryable<T>> GetAllAsync()
+        public virtual IQueryable<T> GetAll()
         {
-            return Task.FromResult(_dbSet.AsQueryable());
+         //   return Task.FromResult(_dbSet.AsQueryable());
+            return _dbSet;
         }
 
-        public async Task<T?> GetByIdAsync(object Id)
+        public virtual async ValueTask<T?> GetByIdAsync(object id)
         {
-            return await _db.FindAsync((Type)Id) as T;
+            return await _dbSet.FindAsync(id);
         }
 
-        public async Task UpdateAsync(T entity)
+        public virtual async Task UpdateAsync(T entity)
         {
             _dbSet.Update(entity);
             await _db.SaveChangesAsync();
         }
 
-        public async Task DeleteAync(object Id)
+        public virtual async Task DeleteAsync(object id)
         {
-            if (await _db.FindAsync((Type)Id) is T entity)
+            if (await _dbSet.FindAsync(id) is T entity)
             {
-                await DeleteAync(entity);
+                await DeleteAsync(entity);
             }
         }
 
-        public async Task DeleteAync(T entity)
+        public virtual async Task DeleteAsync(T entity)
         {
             _dbSet.Remove(entity);
             await _db.SaveChangesAsync();

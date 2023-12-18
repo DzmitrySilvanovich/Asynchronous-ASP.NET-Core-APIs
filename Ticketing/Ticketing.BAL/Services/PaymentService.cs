@@ -1,4 +1,5 @@
 ﻿using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Ticketing.BAL.Contracts;
 using Ticketing.BAL.Model;
 using Ticketing.DAL.Contracts;
@@ -16,10 +17,10 @@ namespace Ticketing.BAL.Services
         readonly IRepository<ShoppingCart> _repositoryShoppingCart;
         readonly IRepository<Seat> _repositorySeat;
 
-       public PaymentService(Repository<Payment> repositoryPayment,
-            Repository<PaymentStatus> repositoryPaymentStatus,
-            Repository<ShoppingCart> repositoryShoppingCart,
-            Repository<Seat> repositorySeat)
+        public PaymentService(Repository<Payment> repositoryPayment,
+             Repository<PaymentStatus> repositoryPaymentStatus,
+             Repository<ShoppingCart> repositoryShoppingCart,
+             Repository<Seat> repositorySeat)
         {
             _repositoryPayment = repositoryPayment;
             _repositoryPaymentStatus = repositoryPaymentStatus;
@@ -29,7 +30,7 @@ namespace Ticketing.BAL.Services
 
         public async Task<PaymentStatusReturnModel> GetPaymentStatusAsync(int paymentId)
         {
-            var returnPaymentStatus = new PaymentStatusReturnModel { Id = 0, Name = string.Empty};
+            var returnPaymentStatus = new PaymentStatusReturnModel { Id = 0, Name = string.Empty };
 
             var payment = await _repositoryPayment.GetByIdAsync(paymentId);
 
@@ -60,19 +61,19 @@ namespace Ticketing.BAL.Services
             payment.PaymentStatusId = PaymentState.FullPayment;
             await _repositoryPayment.UpdateAsync(payment);
 
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts = _repositoryShoppingCart.GetAll();
 
             var shoppingCartItems = shoppingCarts.Where(c => c.CartId == payment.CartId).ToList();
 
             var shoppingCartSeats = shoppingCartItems.Select(sh => sh.SeatId).ToList();
-
-            var allSeats = await _repositorySeat.GetAllAsync();
+                
+            var allSeats = _repositorySeat.GetAll();
 
             var seats = allSeats.Where(s => shoppingCartSeats.Contains(s.Id));
 
             foreach (var seat in seats)
             {
-                seat.SeatStatusId = SeatState.Sold;
+                seat.SeatStatusState = SeatState.Sold;
                 await _repositorySeat.UpdateAsync(seat);
             }
         }
@@ -89,19 +90,19 @@ namespace Ticketing.BAL.Services
             payment.PaymentStatusId = PaymentState.PaymentFailed;
             await _repositoryPayment.UpdateAsync(payment);
 
-            var shoppingCarts = await _repositoryShoppingCart.GetAllAsync();
+            var shoppingCarts =  _repositoryShoppingCart.GetAll();
 
             var shoppingCartItems = shoppingCarts.Where(c => c.CartId == payment.CartId).ToList();
 
             var shoppingCartSeats = shoppingCartItems.Select(sh => sh.SeatId).ToList();
 
-            var allSeats = await _repositorySeat.GetAllAsync();
+            var allSeats = _repositorySeat.GetAll();
 
             var seats = allSeats.Where(s => shoppingCartSeats.Contains(s.Id));
 
             foreach (var seat in seats)
             {
-                seat.SeatStatusId = SeatState.Available;
+                seat.SeatStatusState = SeatState.Available;
                 await _repositorySeat.UpdateAsync(seat);
             }
         }
